@@ -24,13 +24,13 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
           sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-          sh "docker push supaket/podinfo:${env.BUILD_NUMBER}"
+          sh "docker push mavarick09/podinfo:${env.BUILD_NUMBER}"
         }
       }
     }
     stage('Docker Remove Image') {
       steps {
-        sh "docker rmi supaket/podinfo:${env.BUILD_NUMBER}"
+        sh "docker rmi mavarick09/podinfo:${env.BUILD_NUMBER}"
       }
     }
     stage('Deploy') {
