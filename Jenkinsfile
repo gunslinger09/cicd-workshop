@@ -1,25 +1,36 @@
 pipeline {
   agent any
   stages {
-    stage('Docker Build') {
+    stage('Build') {
       steps {
-        sh "docker build -t mavarick09/podinfo:${env.BUILD_NUMBER} ."
+        sh "docker build -t supaket/podinfo:${env.BUILD_NUMBER} ."
+      }
+    }
+    stage('Test'){
+       steps {
+        sh "echo 'Test'"
+      }
+    }
+    stage('Security scan'){
+      steps {
+        sh "npm install snyk@latest -g"
+        sh "snyk test"
       }
     }
     stage('Docker Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
           sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-          sh "docker push mavarick09/podinfo:${env.BUILD_NUMBER}"
+          sh "docker push supaket/podinfo:${env.BUILD_NUMBER}"
         }
       }
     }
     stage('Docker Remove Image') {
       steps {
-        sh "docker rmi mavarick09/podinfo:${env.BUILD_NUMBER}"
+        sh "docker rmi supaket/podinfo:${env.BUILD_NUMBER}"
       }
     }
-    stage('Apply Kubernetes Files') {
+    stage('Deploy') {
       steps {
           withKubeConfig([credentialsId: 'kubeconfig']) {
           sh 'cat deployment.yaml | sed "s/{{BUILD_NUMBER}}/$BUILD_NUMBER/g" | kubectl apply -f -'
