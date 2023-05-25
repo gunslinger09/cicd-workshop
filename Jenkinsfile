@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh "docker build -t mavarick09/podinfo:${env.BUILD_NUMBER} ."
+        sh "docker build -t supaket/podinfo:${env.BUILD_NUMBER} ."
       }
     }
     stage('Test'){
@@ -13,21 +13,24 @@ pipeline {
     }
     stage('Security scan'){
       steps {
-        sh "npm install snyk@latest -g"
+        withCredentials([string(credentialsId: 'snyk-api-token', variable: 'snykToken')]){
+        sh "snyk auth ${snykToken}"
         sh "snyk test"
+        sh "snyk monitor --all-projects"
+        }
       }
     }
     stage('Docker Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
           sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
-          sh "docker push mavarick09/podinfo:${env.BUILD_NUMBER}"
+          sh "docker push supaket/podinfo:${env.BUILD_NUMBER}"
         }
       }
     }
     stage('Docker Remove Image') {
       steps {
-        sh "docker rmi mavarick09/podinfo:${env.BUILD_NUMBER}"
+        sh "docker rmi supaket/podinfo:${env.BUILD_NUMBER}"
       }
     }
     stage('Deploy') {
