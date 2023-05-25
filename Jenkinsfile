@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh "docker build -t supaket/podinfo:${env.BUILD_NUMBER} ."
+        sh "docker build -t mavarick09/podinfo:${env.BUILD_NUMBER} ."
       }
     }
     stage('Test'){
